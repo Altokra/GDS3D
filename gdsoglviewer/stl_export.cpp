@@ -77,7 +77,7 @@ bool STLExport::Export(GDSObject_ogl* obj, const char* filename, bool includeChi
         }
     }
 
-    v_printf(1, "STL Export: collected %d triangles from object %s\n", (int)triangles.size(), obj->Name);
+    v_printf(1, "STL Export: collected %d triangles from object %s\n", (int)triangles.size(), obj->GetName());
 
     return WriteBinarySTL(filename, triangles);
 }
@@ -90,8 +90,11 @@ void STLExport::AddPolygonTriangles(
     const std::vector<size_t>& indices,
     std::vector<Triangle>& triangles)
 {
-    double z1 = height;
-    double z2 = height + thickness;
+    // 如果厚度太小（例如2D标记层），跳过不导出，防止生成退化三角形
+    if (thickness <= 1e-6) return;
+
+    double z1 = height;               // 底部 Z
+    double z2 = height + thickness;   // 顶部 Z
     size_t numPoints = xCoords.size();
 
     if (numPoints < 3 || indices.empty()) return;
@@ -99,89 +102,65 @@ void STLExport::AddPolygonTriangles(
     Triangle tri;
     tri.attribute = 0;
 
-    // Top and bottom faces (using even-odd rule for winding)
-    int e = 1;  // even
-    int o = 1;  // odd
-
-    // Determine winding order
+    // --- 1. 处理顶面和底面 ---
     for (size_t j = 0; j < indices.size() / 3; j++) {
         size_t v0 = indices[j * 3 + 0];
         size_t v1 = indices[j * 3 + 1];
         size_t v2 = indices[j * 3 + 2];
 
-        if ((v0 % 2) == 0 && (v1 % 2) == 0 && (v2 % 2) == 0)
-            e = 0;
-        if ((v0 % 2) == 1 && (v1 % 2) == 1 && (v2 % 2) == 1)
-            o = 0;
-    }
-
-    // Top face
-    for (size_t j = 0; j < indices.size() / 3; j++) {
-        size_t v0 = indices[j * 3 + 0];
-        size_t v1 = indices[j * 3 + 1];
-        size_t v2 = indices[j * 3 + 2];
-
-        float vp0[3] = {(float)xCoords[v0], (float)yCoords[v0], (float)z2};
-        float vp1[3] = {(float)xCoords[v1], (float)yCoords[v1], (float)z2};
-        float vp2[3] = {(float)xCoords[v2], (float)yCoords[v2], (float)z2};
-
-        if ((e && v1 % 2 == 0) || (o && v1 % 2 == 1)) {
-            tri.v1[0] = vp0[0]; tri.v1[1] = vp0[1]; tri.v1[2] = vp0[2];
-            tri.v2[0] = vp1[0]; tri.v2[1] = vp1[1]; tri.v2[2] = vp1[2];
-            tri.v3[0] = vp2[0]; tri.v3[1] = vp2[1]; tri.v3[2] = vp2[2];
-        } else if ((e && v2 % 2 == 0) || (o && v2 % 2 == 1)) {
-            tri.v1[0] = vp1[0]; tri.v1[1] = vp1[1]; tri.v1[2] = vp1[2];
-            tri.v2[0] = vp2[0]; tri.v2[1] = vp2[1]; tri.v2[2] = vp2[2];
-            tri.v3[0] = vp0[0]; tri.v3[1] = vp0[1]; tri.v3[2] = vp0[2];
-        } else {
-            tri.v1[0] = vp2[0]; tri.v1[1] = vp2[1]; tri.v1[2] = vp2[2];
-            tri.v2[0] = vp0[0]; tri.v2[1] = vp0[1]; tri.v2[2] = vp0[2];
-            tri.v3[0] = vp1[0]; tri.v3[1] = vp1[1]; tri.v3[2] = vp1[2];
-        }
-
+        // 顶面 (z2)
+        tri.v1[0] = xCoords[v0]; tri.v1[1] = yCoords[v0]; tri.v1[2] = z2;
+        tri.v2[0] = xCoords[v1]; tri.v2[1] = yCoords[v1]; tri.v2[2] = z2;
+        tri.v3[0] = xCoords[v2]; tri.v3[1] = yCoords[v2]; tri.v3[2] = z2;
         ComputeNormal(tri.v1, tri.v2, tri.v3, tri.normal);
+        
+        // 强制法线朝上 (+Z)
+        if (tri.normal[2] < 0) {
+            std::swap(tri.v2[0], tri.v3[0]);
+            std::swap(tri.v2[1], tri.v3[1]);
+            // 重新计算正确的法线
+            ComputeNormal(tri.v1, tri.v2, tri.v3, tri.normal);
+        }
+        triangles.push_back(tri);
+
+        // 底面 (z1)
+        tri.v1[0] = xCoords[v0]; tri.v1[1] = yCoords[v0]; tri.v1[2] = z1;
+        tri.v2[0] = xCoords[v1]; tri.v2[1] = yCoords[v1]; tri.v2[2] = z1;
+        tri.v3[0] = xCoords[v2]; tri.v3[1] = yCoords[v2]; tri.v3[2] = z1;
+        ComputeNormal(tri.v1, tri.v2, tri.v3, tri.normal);
+        
+        // 强制法线朝下 (-Z)
+        if (tri.normal[2] > 0) {
+            std::swap(tri.v2[0], tri.v3[0]);
+            std::swap(tri.v2[1], tri.v3[1]);
+            ComputeNormal(tri.v1, tri.v2, tri.v3, tri.normal);
+        }
         triangles.push_back(tri);
     }
 
-    // Bottom face (reverse winding for correct normal)
-    for (size_t j = 0; j < indices.size() / 3; j++) {
-        size_t v0 = indices[j * 3 + 0];
-        size_t v1 = indices[j * 3 + 1];
-        size_t v2 = indices[j * 3 + 2];
-
-        float vp0[3] = {(float)xCoords[v0], (float)yCoords[v0], (float)z1};
-        float vp1[3] = {(float)xCoords[v1], (float)yCoords[v1], (float)z1};
-        float vp2[3] = {(float)xCoords[v2], (float)yCoords[v2], (float)z1};
-
-        // Reverse order for bottom face (normal should point down)
-        if ((e && v1 % 2 == 0) || (o && v1 % 2 == 1)) {
-            tri.v1[0] = vp0[0]; tri.v1[1] = vp0[1]; tri.v1[2] = vp0[2];
-            tri.v2[0] = vp1[0]; tri.v2[1] = vp1[1]; tri.v2[2] = vp1[2];
-            tri.v3[0] = vp2[0]; tri.v3[1] = vp2[1]; tri.v3[2] = vp2[2];
-        } else if ((e && v2 % 2 == 0) || (o && v2 % 2 == 1)) {
-            tri.v1[0] = vp2[0]; tri.v1[1] = vp2[1]; tri.v1[2] = vp2[2];
-            tri.v2[0] = vp1[0]; tri.v2[1] = vp1[1]; tri.v2[2] = vp1[2];
-            tri.v3[0] = vp0[0]; tri.v3[1] = vp0[1]; tri.v3[2] = vp0[2];
-        } else {
-            tri.v1[0] = vp1[0]; tri.v1[1] = vp1[1]; tri.v1[2] = vp1[2];
-            tri.v2[0] = vp0[0]; tri.v2[1] = vp0[1]; tri.v2[2] = vp0[2];
-            tri.v3[0] = vp2[0]; tri.v3[1] = vp2[1]; tri.v3[2] = vp2[2];
-        }
-
-        ComputeNormal(tri.v1, tri.v2, tri.v3, tri.normal);
-        triangles.push_back(tri);
+    // --- 2. 判断 2D 多边形顶点的缠绕方向 (Shoelace formula) ---
+    double area = 0.0;
+    for (size_t j = 0; j < numPoints; j++) {
+        size_t j1 = (j + 1) % numPoints;
+        area += (xCoords[j] * yCoords[j1] - xCoords[j1] * yCoords[j]);
     }
+    bool isCCW = (area > 0); // 判断是否为逆时针
 
-    // Side faces
+    // --- 3. 处理侧面 ---
     for (size_t j = 0; j < numPoints; j++) {
         size_t j1 = (j + 1) % numPoints;
 
-        float vp0[3] = {(float)xCoords[j], (float)yCoords[j], (float)z1};
-        float vp1[3] = {(float)xCoords[j1], (float)yCoords[j1], (float)z1};
-        float vp2[3] = {(float)xCoords[j1], (float)yCoords[j1], (float)z2};
-        float vp3[3] = {(float)xCoords[j], (float)yCoords[j], (float)z2};
+        float vp0[3] = {(float)xCoords[j],  (float)yCoords[j],  (float)z1}; // 当前点底
+        float vp1[3] = {(float)xCoords[j1], (float)yCoords[j1], (float)z1}; // 下一点底
+        float vp2[3] = {(float)xCoords[j1], (float)yCoords[j1], (float)z2}; // 下一点顶
+        float vp3[3] = {(float)xCoords[j],  (float)yCoords[j],  (float)z2}; // 当前点顶
 
-        // Two triangles per side quad
+        // 如果多边形本身是顺时针，需要翻转四边形的左右点，以保证法线朝外
+        if (!isCCW) {
+            std::swap(vp0[0], vp1[0]); std::swap(vp0[1], vp1[1]); // 交换底部左右
+            std::swap(vp3[0], vp2[0]); std::swap(vp3[1], vp2[1]); // 交换顶部左右
+        }
+
         // Triangle 1: vp0, vp1, vp2
         tri.v1[0] = vp0[0]; tri.v1[1] = vp0[1]; tri.v1[2] = vp0[2];
         tri.v2[0] = vp1[0]; tri.v2[1] = vp1[1]; tri.v2[2] = vp1[2];
@@ -197,6 +176,7 @@ void STLExport::AddPolygonTriangles(
         triangles.push_back(tri);
     }
 }
+
 
 void STLExport::ComputeNormal(const float v1[3], const float v2[3], const float v3[3], float normal[3]) {
     float edge1[3] = {v2[0] - v1[0], v2[1] - v1[1], v2[2] - v1[2]};

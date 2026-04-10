@@ -46,6 +46,7 @@ WinKeymap::WinKeymap()
 	item->Text = "R:                  Reset View"; AddItem(item);
 	item->Text = "E:                  Toggle Exploded View"; AddItem(item);
 	item->Text = "F:                  Export to GMSH"; AddItem(item);
+	item->Text = "O:                  Export to STL"; AddItem(item);	//update stl export function
 	item->Text = "K:                  Enable Ruler"; AddItem(item);
 	item->Text = "H:                  Enable Net Highlighting"; AddItem(item);
 	item->Text = "ESC:                Cancel"; AddItem(item);

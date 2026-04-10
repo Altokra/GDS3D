@@ -38,6 +38,8 @@
 #include "ui_highlight.h"
 #include "outputStream.h"
 
+#include "stl_export.h"
+
 extern int verbose_output;
 
 MATRIX4X4 worldview;
@@ -1100,9 +1102,24 @@ void GDSParse_ogl::gl_event( int event, int data, int xpos, int ypos , bool shif
 				v_printf(0, "Geo File Done\n");
 			}
 			break;
+		case KEY_O:  // [新增] 监听 O 键导出 STL
+            if (!ui_highlight->GetState()) // 保持和 GMSH 导出一样的逻辑，高亮模式下不导出
+            {
+                if (_topcell) {
+                    v_printf(1, "\n--- Starting STL Export ---\n");
+                    // 强制转换为 GDSObject_ogl* 并调用导出功能，导出的文件名为 output.stl
+                    STLExport::Export((GDSObject_ogl*)_topcell, "output.stl", true);
+                    v_printf(0, "STL File Done\n");
+                } else {
+                    v_printf(1, "Error: No Topcell available to export.\n");
+                }
+            }
+            break;
+
 		default:
 			break;
 		}
+		
 	}
 
 	if( event == 4 ) // Key up

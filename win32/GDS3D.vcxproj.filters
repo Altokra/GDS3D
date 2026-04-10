@@ -143,6 +143,9 @@
     <ClInclude Include="..\libgdsto3d\voro++\src\voro++.hh">
       <Filter>Header Files\libgdsto3d\contrib</Filter>
     </ClInclude>
+    <ClInclude Include="..\gdsoglviewer\stl_export.h">
+      <Filter>Source Files\gdsoglviewer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\gdsoglviewer\gdsobject_ogl.cpp">
@@ -240,6 +243,9 @@
     </ClCompile>
     <ClCompile Include="..\libgdsto3d\Voronoi3D.cpp">
       <Filter>Source Files\libgdsto3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\gdsoglviewer\stl_export.cpp">
+      <Filter>Source Files\gdsoglviewer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

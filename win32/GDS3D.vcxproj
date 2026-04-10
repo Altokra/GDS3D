@@ -35,6 +35,7 @@
     <ClInclude Include="..\gdsoglviewer\listview.h" />
     <ClInclude Include="..\gdsoglviewer\outputStream.h" />
     <ClInclude Include="..\gdsoglviewer\renderer.h" />
+    <ClInclude Include="..\gdsoglviewer\stl_export.h" />
     <ClInclude Include="..\gdsoglviewer\ui_element.h" />
     <ClInclude Include="..\gdsoglviewer\ui_highlight.h" />
     <ClInclude Include="..\gdsoglviewer\ui_ruler.h" />
@@ -69,6 +70,7 @@
     <ClCompile Include="..\gdsoglviewer\listview.cpp" />
     <ClCompile Include="..\gdsoglviewer\outputStream.cpp" />
     <ClCompile Include="..\gdsoglviewer\renderer.cpp" />
+    <ClCompile Include="..\gdsoglviewer\stl_export.cpp" />
     <ClCompile Include="..\gdsoglviewer\ui_highlight.cpp" />
     <ClCompile Include="..\gdsoglviewer\ui_ruler.cpp" />
     <ClCompile Include="..\gdsoglviewer\windowmanager.cpp" />
