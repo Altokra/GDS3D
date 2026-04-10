@@ -39,6 +39,7 @@
 #include "outputStream.h"
 
 #include "stl_export.h"
+#include "step_export.h"
 
 extern int verbose_output;
 
@@ -1115,7 +1116,21 @@ void GDSParse_ogl::gl_event( int event, int data, int xpos, int ypos , bool shif
                 }
             }
             break;
+		case KEY_G:  
+            if (!ui_highlight->GetState()) 
+            {
+                // _topcell 是 GDS3D 中代表当前加载的芯片顶层单元的全局/成员变量
+                if (_topcell) {
+                    v_printf(1, "\n--- Starting STEP Export ---\n");
+                    // 传入真实的芯片对象！
+                    STEPExport::Export((GDSObject_ogl*)_topcell, "output_real_chip.step");
+                    v_printf(1, "STEP File Done\n");
+                } else {
+                    v_printf(1, "Error: No GDS file loaded!\n");
+                }
+            }
 
+            break;
 		default:
 			break;
 		}

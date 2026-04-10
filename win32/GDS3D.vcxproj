@@ -35,6 +35,7 @@
     <ClInclude Include="..\gdsoglviewer\listview.h" />
     <ClInclude Include="..\gdsoglviewer\outputStream.h" />
     <ClInclude Include="..\gdsoglviewer\renderer.h" />
+    <ClInclude Include="..\gdsoglviewer\step_export.h" />
     <ClInclude Include="..\gdsoglviewer\stl_export.h" />
     <ClInclude Include="..\gdsoglviewer\ui_element.h" />
     <ClInclude Include="..\gdsoglviewer\ui_highlight.h" />
@@ -70,6 +71,7 @@
     <ClCompile Include="..\gdsoglviewer\listview.cpp" />
     <ClCompile Include="..\gdsoglviewer\outputStream.cpp" />
     <ClCompile Include="..\gdsoglviewer\renderer.cpp" />
+    <ClCompile Include="..\gdsoglviewer\step_export.cpp" />
     <ClCompile Include="..\gdsoglviewer\stl_export.cpp" />
     <ClCompile Include="..\gdsoglviewer\ui_highlight.cpp" />
     <ClCompile Include="..\gdsoglviewer\ui_ruler.cpp" />
@@ -290,7 +292,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;_RELEASE;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\libgdsto3d;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\libgdsto3d;D:\Program Files\opencascade\opencascade-7.9.3-vc14-64\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <CallingConvention>StdCall</CallingConvention>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -300,9 +302,10 @@
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;TKernel.lib;TKMath.lib;TKG2d.lib;TKG3d.lib;TKBRep.lib;TKTopAlgo.lib;TKPrim.lib;TKDE.lib;TKDESTEP.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <Version>1.9</Version>
+      <AdditionalLibraryDirectories>D:\Program Files\opencascade\opencascade-7.9.3-vc14-64\win64\vc14\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-XP|x64'">

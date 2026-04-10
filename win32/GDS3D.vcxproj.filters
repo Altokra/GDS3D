@@ -144,7 +144,10 @@
       <Filter>Header Files\libgdsto3d\contrib</Filter>
     </ClInclude>
     <ClInclude Include="..\gdsoglviewer\stl_export.h">
-      <Filter>Source Files\gdsoglviewer</Filter>
+      <Filter>Header Files\gdsoglviewer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gdsoglviewer\step_export.h">
+      <Filter>Header Files\gdsoglviewer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -245,6 +248,9 @@
       <Filter>Source Files\libgdsto3d</Filter>
     </ClCompile>
     <ClCompile Include="..\gdsoglviewer\stl_export.cpp">
+      <Filter>Source Files\gdsoglviewer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\gdsoglviewer\step_export.cpp">
       <Filter>Source Files\gdsoglviewer</Filter>
     </ClCompile>
   </ItemGroup>
