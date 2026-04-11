@@ -1,0 +1,452 @@
+# GDS3D techfile for Nangate Open Cell Library (FreePDK45 45nm)
+#
+# 数据来源:
+#   层号映射: magic.tech (cifoutput calma 定义)
+#   金属层参数: NangateOpenCellLibrary.tech.lef (HEIGHT/THICKNESS)
+#   DRC 验证: FreePDK45.lydrc
+#   颜色: NangateOpenCellLibrary.lyp (KLayout)
+#
+# GDS 文件实际存在的层: 1,2,3,4,5,9,10,11,63,235
+# magic.tech 完整映射:
+#   DIFF(1/0), PWELL(2/0), NWELL(3/0), NIMP(4/0), PIMP(5/0)
+#   POLY(9/0), CONT(10/0), METAL1(11/0)
+#   VIA1(12/0), METAL2(13/0), VIA2(14/0), ..., METAL10(29/0)
+#   BOUNDARY(235/0), TEXT(63/63)
+#
+# 金属层高度/厚度来自 LEF (单位: nm, 原始值 um x1000):
+#   metal1:  H=370nm  T=130nm   (LEF: 0.37/0.13)
+#   metal2:  H=620nm  T=140nm   (LEF: 0.62/0.14)
+#   metal3:  H=880nm  T=140nm   (LEF: 0.88/0.14)
+#   metal4:  H=1140nm T=280nm   (LEF: 1.14/0.28)
+#   metal5:  H=1710nm T=280nm   (LEF: 1.71/0.28)
+#   metal6:  H=2280nm T=280nm   (LEF: 2.28/0.28)
+#   metal7:  H=2850nm T=800nm   (LEF: 2.85/0.80)
+#   metal8:  H=4470nm T=800nm   (LEF: 4.47/0.80)
+#   metal9:  H=6090nm T=2000nm  (LEF: 6.09/2.00)
+#   metal10: H=10090nm T=2000nm (LEF: 10.09/2.00)
+
+# ============================================================
+# Substrate (必须保留, 层号固定 255)
+# ============================================================
+LayerStart: Substrate
+Layer: 255
+Datatype: 0
+Height: -10000.0
+Thickness: 10000.0
+Red: 0.15
+Green: 0.15
+Blue: 0.15
+Filter: 0.5
+Metal: 0
+Show: 1
+LayerEnd
+
+# ============================================================
+# Well 层 (source: magic.tech cifoutput -> calma 2 0 / calma 3 0)
+# ============================================================
+LayerStart: P-Well
+Layer: 2
+Datatype: 0
+Height: -200.0
+Thickness: 400.0
+Red: 1.0
+Green: 0.5
+Blue: 0.0
+Filter: 0.0
+Metal: 0
+Show: 1
+LayerEnd
+
+LayerStart: N-Well
+Layer: 3
+Datatype: 0
+Height: -200.0
+Thickness: 400.0
+Red: 0.0
+Green: 0.8
+Blue: 0.4
+Filter: 0.0
+Metal: 0
+Show: 1
+LayerEnd
+
+# ============================================================
+# Implant 层 (source: magic.tech -> calma 4 0 / calma 5 0)
+# ============================================================
+LayerStart: N+ Implant
+Layer: 4
+Datatype: 0
+Height: -100.0
+Thickness: 300.0
+Red: 0.0
+Green: 0.8
+Blue: 0.4
+Filter: 0.0
+Metal: 0
+Show: 1
+LayerEnd
+
+LayerStart: P+ Implant
+Layer: 5
+Datatype: 0
+Height: -100.0
+Thickness: 300.0
+Red: 1.0
+Green: 0.5
+Blue: 0.0
+Filter: 0.0
+Metal: 0
+Show: 1
+LayerEnd
+
+# ============================================================
+# Active / Diffusion (source: magic.tech -> calma 1 0)
+# ============================================================
+LayerStart: Active
+Layer: 1
+Datatype: 0
+Height: 200.0
+Thickness: 30.0
+Red: 0.0
+Green: 0.8
+Blue: 0.4
+Filter: 0.0
+Metal: 0
+Show: 1
+LayerEnd
+
+# ============================================================
+# Polysilicon (source: magic.tech -> calma 9 0)
+# ============================================================
+LayerStart: Polysilicon
+Layer: 9
+Datatype: 0
+Height: 230.0
+Thickness: 80.0
+Red: 0.91
+Green: 0.12
+Blue: 0.05
+Filter: 0.0
+Metal: 1
+Show: 1
+LayerEnd
+
+# ============================================================
+# Contact (source: magic.tech -> calma 10 0)
+# 从 poly/active 表面 (230nm) 到 metal1 底部 (370nm)
+# ============================================================
+LayerStart: Contact
+Layer: 10
+Datatype: 0
+Height: 230.0
+Thickness: 140.0
+Red: 0.0
+Green: 0.8
+Blue: 0.4
+Filter: 0.0
+Metal: 0
+Show: 1
+LayerEnd
+
+# ============================================================
+# Metal 1 (LEF: H=0.37um T=0.13um -> H=370nm T=130nm)
+# ============================================================
+LayerStart: Metal 1
+Layer: 11
+Datatype: 0
+Height: 370.0
+Thickness: 130.0
+Red: 0.0
+Green: 0.0
+Blue: 1.0
+Filter: 0.0
+Metal: 1
+Shortkey: 1
+Show: 1
+LayerEnd
+
+# ============================================================
+# 以下层在 NangateOpenCellLibrary.gds 中不存在
+# 但定义在此以便支持包含更多层的 GDS 文件
+# 参数全部来自 LEF tech file (精确值)
+# ============================================================
+
+LayerStart: Via 1
+Layer: 12
+Datatype: 0
+Height: 500.0
+Thickness: 120.0
+Red: 0.6
+Green: 0.0
+Blue: 0.6
+Filter: 0.0
+Metal: 0
+Shortkey: <Shift> 1
+Show: 0
+LayerEnd
+
+LayerStart: Metal 2
+Layer: 13
+Datatype: 0
+Height: 620.0
+Thickness: 140.0
+Red: 1.0
+Green: 0.0
+Blue: 1.0
+Filter: 0.0
+Metal: 1
+Shortkey: 2
+Show: 0
+LayerEnd
+
+LayerStart: Via 2
+Layer: 14
+Datatype: 0
+Height: 760.0
+Thickness: 120.0
+Red: 0.22
+Green: 0.75
+Blue: 1.0
+Filter: 0.0
+Metal: 0
+Shortkey: <Shift> 2
+Show: 0
+LayerEnd
+
+LayerStart: Metal 3
+Layer: 15
+Datatype: 0
+Height: 880.0
+Thickness: 140.0
+Red: 0.0
+Green: 1.0
+Blue: 1.0
+Filter: 0.0
+Metal: 1
+Shortkey: 3
+Show: 0
+LayerEnd
+
+LayerStart: Via 3
+Layer: 16
+Datatype: 0
+Height: 1020.0
+Thickness: 120.0
+Red: 1.0
+Green: 0.9
+Blue: 0.75
+Filter: 0.0
+Metal: 0
+Shortkey: <Shift> 3
+Show: 0
+LayerEnd
+
+LayerStart: Metal 4
+Layer: 17
+Datatype: 0
+Height: 1140.0
+Thickness: 280.0
+Red: 1.0
+Green: 1.0
+Blue: 0.8
+Filter: 0.0
+Metal: 1
+Shortkey: 4
+Show: 0
+LayerEnd
+
+LayerStart: Via 4
+Layer: 18
+Datatype: 0
+Height: 1420.0
+Thickness: 290.0
+Red: 0.0
+Green: 0.0
+Blue: 1.0
+Filter: 0.0
+Metal: 0
+Shortkey: <Shift> 4
+Show: 0
+LayerEnd
+
+LayerStart: Metal 5
+Layer: 19
+Datatype: 0
+Height: 1710.0
+Thickness: 280.0
+Red: 0.22
+Green: 0.75
+Blue: 1.0
+Filter: 0.0
+Metal: 1
+Shortkey: 5
+Show: 0
+LayerEnd
+
+LayerStart: Via 5
+Layer: 20
+Datatype: 0
+Height: 1990.0
+Thickness: 290.0
+Red: 1.0
+Green: 1.0
+Blue: 0.0
+Filter: 0.0
+Metal: 0
+Shortkey: <Shift> 5
+Show: 0
+LayerEnd
+
+LayerStart: Metal 6
+Layer: 21
+Datatype: 0
+Height: 2280.0
+Thickness: 280.0
+Red: 0.85
+Green: 0.8
+Blue: 0.0
+Filter: 0.0
+Metal: 1
+Shortkey: 6
+Show: 0
+LayerEnd
+
+LayerStart: Via 6
+Layer: 22
+Datatype: 0
+Height: 2560.0
+Thickness: 290.0
+Red: 1.0
+Green: 0.0
+Blue: 1.0
+Filter: 0.0
+Metal: 0
+Shortkey: <Shift> 6
+Show: 0
+LayerEnd
+
+LayerStart: Metal 7
+Layer: 23
+Datatype: 0
+Height: 2850.0
+Thickness: 800.0
+Red: 0.0
+Green: 1.0
+Blue: 0.0
+Filter: 0.0
+Metal: 1
+Shortkey: 7
+Show: 0
+LayerEnd
+
+LayerStart: Via 7
+Layer: 24
+Datatype: 0
+Height: 3650.0
+Thickness: 820.0
+Red: 0.22
+Green: 0.75
+Blue: 1.0
+Filter: 0.0
+Metal: 0
+Shortkey: <Shift> 7
+Show: 0
+LayerEnd
+
+LayerStart: Metal 8
+Layer: 25
+Datatype: 0
+Height: 4470.0
+Thickness: 800.0
+Red: 1.0
+Green: 1.0
+Blue: 1.0
+Filter: 0.0
+Metal: 1
+Shortkey: 8
+Show: 0
+LayerEnd
+
+LayerStart: Via 8
+Layer: 26
+Datatype: 0
+Height: 5270.0
+Thickness: 820.0
+Red: 1.0
+Green: 1.0
+Blue: 0.8
+Filter: 0.0
+Metal: 0
+Shortkey: <Shift> 8
+Show: 0
+LayerEnd
+
+LayerStart: Metal 9
+Layer: 27
+Datatype: 0
+Height: 6090.0
+Thickness: 2000.0
+Red: 1.0
+Green: 0.9
+Blue: 0.75
+Filter: 0.0
+Metal: 1
+Shortkey: 9
+Show: 0
+LayerEnd
+
+LayerStart: Via 9
+Layer: 28
+Datatype: 0
+Height: 8090.0
+Thickness: 2000.0
+Red: 0.0
+Green: 0.0
+Blue: 1.0
+Filter: 0.0
+Metal: 0
+Shortkey: <Shift> 9
+Show: 0
+LayerEnd
+
+LayerStart: Metal 10
+Layer: 29
+Datatype: 0
+Height: 10090.0
+Thickness: 2000.0
+Red: 1.0
+Green: 0.5
+Blue: 0.0
+Filter: 0.0
+Metal: 1
+Show: 0
+LayerEnd
+
+# ============================================================
+# 标记层 (无物理高度)
+# ============================================================
+LayerStart: Outline
+Layer: 235
+Datatype: 0
+Height: 0.0
+Thickness: 0.0
+Red: 1.0
+Green: 1.0
+Blue: 1.0
+Filter: 0.0
+Metal: 0
+Show: 0
+LayerEnd
+
+LayerStart: Text
+Layer: 63
+Datatype: 0
+Height: 0.0
+Thickness: 0.0
+Red: 0.6
+Green: 0.0
+Blue: 0.9
+Filter: 0.0
+Metal: 0
+Show: 0
+LayerEnd

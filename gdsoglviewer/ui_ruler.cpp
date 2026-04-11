@@ -214,10 +214,11 @@ UIRuler::Event(int event, int data, int xpos, int ypos , bool shift, bool contro
 					{
 						if (layer->Show) {
 							rulerlayer = layer->Layer;
+							rulerdatatype = layer->Datatype;	//update 04-11-2026 防止 GetLayer 因 Datatype 不匹配返回 NULL
 							wm->getProcess()->SetCurrentProcess(layer->ProcessName);
 						}
 						layer = layer->Next;
-					}	
+					}
 				}
 				rulerstate = 1;
 
@@ -232,7 +233,11 @@ UIRuler::Event(int event, int data, int xpos, int ypos , bool shift, bool contro
 	// Not enabled? -> exit
 	if(rulerstate == 0)
 		return false;
-    
+    // Safety: skip if layer not found (e.g. Datatype mismatch)
+	if(!layer)
+    	return false;//update 04-11-2026 安全防护，空指针保护
+
+
     if(rulerlayer >= 0)
 	{
 		VECTOR3D ray = VECTOR3D(-((float)wm->screenWidth)/((float)wm->screenHeight)*(((float)xpos)/((float)wm->screenWidth)-0.5f), 1.0f*(((float)ypos)/((float)wm->screenHeight)-0.5f), 1.07f); // HACK!!
