@@ -1,0 +1,361 @@
+# GDS3D techfile for SRAM_new
+# Based on layer analysis of SRAM_new.gds
+# GDS layers: 10,14,27,30,40,43,50,61,62,63,64,65,66,70,71,72,73,74,127,141,142,143,145
+# Via names in LEF: M2_M1, M3_M2, M4_M3, M5_M4, M6_M5
+# Estimated for 45nm or similar advanced node
+
+# ============================================================
+# Substrate
+# ============================================================
+LayerStart: Substrate
+Layer: 255
+Datatype: 0
+Height: -5000.0
+Thickness: 5000.0
+Red: 0.3
+Green: 0.3
+Blue: 0.3
+Filter: 0.5
+Metal: 0
+Show: 1
+LayerEnd
+
+# ============================================================
+# Well Layers
+# ============================================================
+LayerStart: P-Well
+Layer: 40
+Datatype: 0
+Height: -300.0
+Thickness: 500.0
+Red: 1.0
+Green: 0.5
+Blue: 0.0
+Filter: 0.0
+Metal: 0
+Show: 1
+LayerEnd
+
+LayerStart: N-Well
+Layer: 43
+Datatype: 0
+Height: -300.0
+Thickness: 500.0
+Red: 0.0
+Green: 0.8
+Blue: 0.4
+Filter: 0.0
+Metal: 0
+Show: 1
+LayerEnd
+
+# ============================================================
+# Implant Layers
+# ============================================================
+LayerStart: P+ Implant
+Layer: 70
+Datatype: 0
+Height: -100.0
+Thickness: 300.0
+Red: 1.0
+Green: 0.3
+Blue: 0.3
+Filter: 0.0
+Metal: 0
+Show: 1
+LayerEnd
+
+LayerStart: N+ Implant
+Layer: 71
+Datatype: 0
+Height: -100.0
+Thickness: 300.0
+Red: 0.3
+Green: 0.8
+Blue: 0.3
+Filter: 0.0
+Metal: 0
+Show: 1
+LayerEnd
+
+LayerStart: P+ Implant 2
+Layer: 72
+Datatype: 0
+Height: -100.0
+Thickness: 300.0
+Red: 1.0
+Green: 0.5
+Blue: 0.5
+Filter: 0.0
+Metal: 0
+Show: 1
+LayerEnd
+
+LayerStart: N+ Implant 2
+Layer: 73
+Datatype: 0
+Height: -100.0
+Thickness: 300.0
+Red: 0.5
+Green: 1.0
+Blue: 0.5
+Filter: 0.0
+Metal: 0
+Show: 1
+LayerEnd
+
+LayerStart: Implant 3
+Layer: 74
+Datatype: 0
+Height: -100.0
+Thickness: 300.0
+Red: 0.8
+Green: 0.8
+Blue: 0.2
+Filter: 0.0
+Metal: 0
+Show: 1
+LayerEnd
+
+# ============================================================
+# Active / Diffusion
+# ============================================================
+LayerStart: Active
+Layer: 14
+Datatype: 0
+Height: 200.0
+Thickness: 30.0
+Red: 0.0
+Green: 0.6
+Blue: 0.8
+Filter: 0.0
+Metal: 0
+Show: 1
+LayerEnd
+
+LayerStart: Active 2
+Layer: 27
+Datatype: 0
+Height: 200.0
+Thickness: 30.0
+Red: 0.2
+Green: 0.6
+Blue: 0.8
+Filter: 0.0
+Metal: 0
+Show: 1
+LayerEnd
+
+# ============================================================
+# Polysilicon
+# ============================================================
+LayerStart: Polysilicon
+Layer: 30
+Datatype: 0
+Height: 230.0
+Thickness: 100.0
+Red: 0.91
+Green: 0.12
+Blue: 0.05
+Filter: 0.0
+Metal: 1
+Show: 1
+LayerEnd
+
+LayerStart: Polysilicon 2
+Layer: 50
+Datatype: 0
+Height: 230.0
+Thickness: 100.0
+Red: 0.85
+Green: 0.15
+Blue: 0.1
+Filter: 0.0
+Metal: 1
+Show: 1
+LayerEnd
+
+# ============================================================
+# Contact / Local Interconnect
+# ============================================================
+LayerStart: Contact
+Layer: 10
+Datatype: 0
+Height: 230.0
+Thickness: 150.0
+Red: 0.8
+Green: 0.6
+Blue: 0.2
+Filter: 0.0
+Metal: 0
+Show: 1
+LayerEnd
+
+LayerStart: LocalInterconnect
+Layer: 61
+Datatype: 0
+Height: 330.0
+Thickness: 100.0
+Red: 0.7
+Green: 0.5
+Blue: 0.3
+Filter: 0.0
+Metal: 1
+Show: 1
+LayerEnd
+
+# ============================================================
+# Metal 1
+# ============================================================
+LayerStart: Metal 1
+Layer: 62
+Datatype: 0
+Height: 430.0
+Thickness: 150.0
+Red: 0.0
+Green: 0.5
+Blue: 1.0
+Filter: 0.0
+Metal: 1
+Shortkey: 1
+Show: 1
+LayerEnd
+
+# ============================================================
+# Via 1 (M2_M1)
+# ============================================================
+LayerStart: Via 1
+Layer: 63
+Datatype: 0
+Height: 580.0
+Thickness: 120.0
+Red: 1.0
+Green: 0.0
+Blue: 1.0
+Filter: 0.0
+Metal: 0
+Shortkey: <Shift> 1
+Show: 1
+LayerEnd
+
+# ============================================================
+# Metal 2
+# ============================================================
+LayerStart: Metal 2
+Layer: 64
+Datatype: 0
+Height: 700.0
+Thickness: 200.0
+Red: 1.0
+Green: 0.0
+Blue: 0.0
+Filter: 0.0
+Metal: 1
+Shortkey: 2
+Show: 1
+LayerEnd
+
+# ============================================================
+# Via 2 (M3_M2)
+# ============================================================
+LayerStart: Via 2
+Layer: 65
+Datatype: 0
+Height: 900.0
+Thickness: 120.0
+Red: 0.0
+Green: 1.0
+Blue: 0.0
+Filter: 0.0
+Metal: 0
+Shortkey: <Shift> 2
+Show: 1
+LayerEnd
+
+# ============================================================
+# Metal 3
+# ============================================================
+LayerStart: Metal 3
+Layer: 66
+Datatype: 0
+Height: 1020.0
+Thickness: 200.0
+Red: 0.0
+Green: 1.0
+Blue: 1.0
+Filter: 0.0
+Metal: 1
+Shortkey: 3
+Show: 1
+LayerEnd
+
+# ============================================================
+# Text / Labels
+# ============================================================
+LayerStart: Text
+Layer: 141
+Datatype: 0
+Height: 0.0
+Thickness: 0.0
+Red: 1.0
+Green: 1.0
+Blue: 0.0
+Filter: 0.0
+Metal: 0
+Show: 0
+LayerEnd
+
+LayerStart: Text 2
+Layer: 142
+Datatype: 0
+Height: 0.0
+Thickness: 0.0
+Red: 1.0
+Green: 0.8
+Blue: 0.0
+Filter: 0.0
+Metal: 0
+Show: 0
+LayerEnd
+
+LayerStart: Text 3
+Layer: 143
+Datatype: 0
+Height: 0.0
+Thickness: 0.0
+Red: 1.0
+Green: 0.6
+Blue: 0.0
+Filter: 0.0
+Metal: 0
+Show: 0
+LayerEnd
+
+LayerStart: Text 4
+Layer: 145
+Datatype: 0
+Height: 0.0
+Thickness: 0.0
+Red: 1.0
+Green: 0.4
+Blue: 0.0
+Filter: 0.0
+Metal: 0
+Show: 0
+LayerEnd
+
+# ============================================================
+# Boundary / Outline
+# ============================================================
+LayerStart: Outline
+Layer: 127
+Datatype: 0
+Height: 0.0
+Thickness: 0.0
+Red: 1.0
+Green: 1.0
+Blue: 1.0
+Filter: 0.0
+Metal: 0
+Show: 0
+LayerEnd
