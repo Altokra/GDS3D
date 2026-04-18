@@ -15,6 +15,9 @@
 #include "../libgdsto3d/gdspolygon.h"
 #include "../libgdsto3d/clipper/clipper.hpp"
 
+#include <algorithm>  // for std::max
+#include <cmath>      // for std::abs
+
 using namespace ClipperLib;
 
 // --- Helper: GDSPolygon -> Clipper Path ---
@@ -70,6 +73,62 @@ static Paths UnionAndClean(const Paths& input, cInt delta_int)
     return contours;
 }
 
+// --- Remove sliver vertices from a single path ---
+// A sliver vertex is one where at least one adjacent edge is shorter than threshold.
+// Removing it "flattens" the narrow edge.
+// Works in Clipper integer coordinates (threshold is in integer units).
+static Path RemoveSliverVertices(const Path& path, cInt threshold)
+{
+    if (path.size() < 4) return path; // Need at least a triangle
+
+    vector<bool> keep(path.size(), true);
+    size_t n = path.size();
+
+    // Find the minimum edge length for diagnostics
+    cInt minEdgeLen = 0x7FFFFFFFFFFFFFFFLL; // INT64_MAX
+
+    // Mark sliver vertices for removal
+    for (size_t i = 0; i < n; i++) {
+        size_t prev = (i + n - 1) % n;
+        size_t next = (i + 1) % n;
+
+        cInt dx_prev = path[i].X - path[prev].X;
+        cInt dy_prev = path[i].Y - path[prev].Y;
+        cInt len_prev = std::max(std::abs(dx_prev), std::abs(dy_prev)); // L-infinity for axis-aligned
+
+        cInt dx_next = path[next].X - path[i].X;
+        cInt dy_next = path[next].Y - path[i].Y;
+        cInt len_next = std::max(std::abs(dx_next), std::abs(dy_next));
+
+        // Track minimum edge length
+        cInt minAdj = (len_prev < len_next) ? len_prev : len_next;
+        if (minAdj < minEdgeLen) minEdgeLen = minAdj;
+
+        // If one adjacent edge is a sliver (< threshold), mark this vertex for removal
+        if (len_prev < threshold || len_next < threshold) {
+            keep[i] = false;
+        }
+    }
+
+    // Build result with only kept vertices
+    Path result;
+    result.reserve(n);
+    int removed = 0;
+    for (size_t i = 0; i < n; i++) {
+        if (keep[i]) {
+            result.push_back(path[i]);
+        } else {
+            removed++;
+        }
+    }
+
+    v_printf(1, "[SliverRemoval] %zu vertices -> %zu (removed %d, threshold=%lld, minEdge=%lld)\n",
+             n, result.size(), removed, threshold, minEdgeLen);
+
+    if (result.size() < 3) return path; // Safety: don't degenerate
+    return result;
+}
+
 size_t PolygonCleaner::CleanPolygonsInPlace(
     std::vector<GDSPolygon*>& polygons,
     double delta_db)
@@ -80,7 +139,7 @@ size_t PolygonCleaner::CleanPolygonsInPlace(
     double unitu = polygons[0]->GetLayer()->Units->Unitu;
     cInt delta_int = static_cast<cInt>(rounded(delta_db / unitu));
 
-    v_printf(2, "[PolygonCleaner] InPlace: %zu polygons, delta_int=%lld\n", polygons.size(), delta_int);
+    v_printf(1, "[PolygonCleaner] InPlace: %zu polygons, delta_int=%lld, unitu=%.10f\n", polygons.size(), delta_int, unitu);
 
     // Convert all polygons to Clipper paths
     Paths input;
@@ -93,7 +152,7 @@ size_t PolygonCleaner::CleanPolygonsInPlace(
 
     if (input.empty()) return 0;
 
-    v_printf(2, "[PolygonCleaner] Input paths: %zu\n", input.size());
+    v_printf(1, "[PolygonCleaner] Input paths: %zu\n", input.size());
 
     // Run union
     Paths cleaned = UnionAndClean(input, delta_int);
@@ -102,8 +161,13 @@ size_t PolygonCleaner::CleanPolygonsInPlace(
         return 0;
     }
 
-    v_printf(2, "[PolygonCleaner] Union result: %zu polygons (input was %zu)\n",
+    v_printf(1, "[PolygonCleaner] Union result: %zu polygons (input was %zu)\n",
              cleaned.size(), input.size());
+
+    // Remove sliver vertices from each unioned polygon
+    for (size_t i = 0; i < cleaned.size(); i++) {
+        cleaned[i] = RemoveSliverVertices(cleaned[i], delta_int);
+    }
 
     // Write cleaned coordinates back into original polygon objects
     size_t outputCount = cleaned.size();
@@ -154,7 +218,7 @@ size_t PolygonCleaner::CleanPolygonsToCoords(
 
     if (input.empty()) return 0;
 
-    v_printf(2, "[PolygonCleaner] Input paths: %zu\n", input.size());
+    v_printf(1, "[PolygonCleaner] Input paths: %zu\n", input.size());
 
     // Run union
     Paths cleaned = UnionAndClean(input, delta_int);
@@ -163,8 +227,13 @@ size_t PolygonCleaner::CleanPolygonsToCoords(
         return 0;
     }
 
-    v_printf(2, "[PolygonCleaner] Union result: %zu polygons (input was %zu)\n",
+    v_printf(1, "[PolygonCleaner] Union result: %zu polygons (input was %zu)\n",
              cleaned.size(), input.size());
+
+    // Remove sliver vertices from each unioned polygon
+    for (size_t i = 0; i < cleaned.size(); i++) {
+        cleaned[i] = RemoveSliverVertices(cleaned[i], delta_int);
+    }
 
     // Map cleaned results back to original polygon pointers
     size_t outputCount = cleaned.size();

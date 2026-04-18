@@ -1109,8 +1109,8 @@ void GDSParse_ogl::gl_event( int event, int data, int xpos, int ypos , bool shif
                 if (_topcell) {
                     v_printf(1, "\n--- Starting STL Export ---\n");
                     // 强制转换为 GDSObject_ogl* 并调用导出功能，导出的文件名为 output.stl
-                    // 启用窄边清理 (delta=5.0db单位，约5nm)
-                    STLExport::Export((GDSObject_ogl*)_topcell, "output.stl", true, true, 5.0);
+                    // 启用窄边清理 (delta=0.01 → delta_int=10, 消除<10nm的窄边)
+                    STLExport::Export((GDSObject_ogl*)_topcell, "output.stl", true, true, 0.01);
                     v_printf(0, "STL File Done\n");
                 } else {
                     v_printf(1, "Error: No Topcell available to export.\n");
@@ -1123,8 +1123,8 @@ void GDSParse_ogl::gl_event( int event, int data, int xpos, int ypos , bool shif
                 // _topcell 是 GDS3D 中代表当前加载的芯片顶层单元的全局/成员变量
                 if (_topcell) {
                     v_printf(1, "\n--- Starting STEP Export ---\n");
-                    // 传入真实的芯片对象！启用窄边清理 (delta=5.0db单位，约5nm)
-                    STEPExport::Export((GDSObject_ogl*)_topcell, "output_real_chip.step", true, true, 5.0);
+                    // 传入真实的芯片对象！启用窄边清理 (delta=0.01 → delta_int=10, 消除<10nm的窄边)
+                    STEPExport::Export((GDSObject_ogl*)_topcell, "output_real_chip.step", true, true, 0.01);
                     v_printf(1, "STEP File Done\n");
                 } else {
                     v_printf(1, "Error: No GDS file loaded!\n");
