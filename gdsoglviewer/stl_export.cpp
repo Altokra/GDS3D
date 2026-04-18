@@ -21,63 +21,144 @@
 #include "gdsobject_ogl.h"
 #include "gdsobject.h"
 #include "gds_globals.h"
+#include "polygon_cleaner.h"
 #include <cmath>
 #include <cstdio>
+#include <map>
 
 bool STLExport::Export(GDSObject_ogl* obj, const char* filename) {
-    return Export(obj, filename, true);
+    return Export(obj, filename, true, false, 0.0);
 }
 
 bool STLExport::Export(GDSObject_ogl* obj, const char* filename, bool includeChildren) {
+    return Export(obj, filename, includeChildren, false, 0.0);
+}
+
+bool STLExport::Export(GDSObject_ogl* obj, const char* filename,
+                       bool includeChildren, bool enableNarrowEdgeClean,
+                       double narrowEdgeDelta) {
     if (!obj) {
         v_printf(1, "Error: NULL object passed to STL export\n");
         return false;
     }
 
+    // ============================================================
+    // Step 1: Collect all polygons into a flat list
+    // ============================================================
+    std::vector<GDSPolygon*> allPolygons;
+
+    for (size_t i = 0; i < obj->PolygonItems.size(); i++) {
+        if (obj->PolygonItems[i]) {
+            allPolygons.push_back(obj->PolygonItems[i]);
+        }
+    }
+
+    if (includeChildren) {
+        for (size_t i = 0; i < obj->refs.size(); i++) {
+            GDSObject* ref = obj->refs[i]->object;
+            if (ref) {
+                GDSObject_ogl* refOgl = (GDSObject_ogl*)ref;
+                for (size_t j = 0; j < refOgl->PolygonItems.size(); j++) {
+                    if (refOgl->PolygonItems[j]) {
+                        allPolygons.push_back(refOgl->PolygonItems[j]);
+                    }
+                }
+            }
+        }
+    }
+
+    v_printf(1, "STL Export: collected %zu polygons\n", allPolygons.size());
+
+    // ============================================================
+    // Step 2: Clean narrow edges per Z-layer (optional, non-destructive)
+    // ============================================================
+    // Maps polygon pointer -> cleaned (xCoords, yCoords).
+    // If empty, use original polygon data.
+    std::map<GDSPolygon*, std::pair<std::vector<double>, std::vector<double>>> cleanedCoords;
+
+    if (enableNarrowEdgeClean && narrowEdgeDelta > 0.0) {
+        // Z-layer grouping key
+        struct ZLayerKey {
+            double height, thickness;
+            bool operator<(const ZLayerKey& o) const {
+                if (height != o.height) return height < o.height;
+                return thickness < o.thickness;
+            }
+        };
+
+        std::map<ZLayerKey, std::vector<GDSPolygon*>> layerGroups;
+        for (auto* poly : allPolygons) {
+            double h = poly->GetHeight();
+            double t = poly->GetThickness();
+            if (t <= 1e-6 || poly->GetPoints() < 3) continue;
+            ZLayerKey key = {h, t};
+            layerGroups[key].push_back(poly);
+        }
+
+        v_printf(1, "[STL Export] Cleaning narrow edges (delta=%.1f) across %zu layers...\n",
+                 narrowEdgeDelta, layerGroups.size());
+        for (auto& kv : layerGroups) {
+            PolygonCleaner::CleanPolygonsToCoords(kv.second, narrowEdgeDelta, cleanedCoords);
+        }
+        v_printf(1, "[STL Export] Narrow edge cleaning complete.\n");
+    }
+
+    // ============================================================
+    // Step 3: Generate triangles from (cleaned) polygons
+    // ============================================================
     std::vector<Triangle> triangles;
 
-    // Helper lambda to collect triangles from one object
-    auto collectTriangles = [&](GDSObject_ogl* object, std::vector<Triangle>& tris) {
-        for (size_t i = 0; i < object->PolygonItems.size(); i++) {
-            class GDSPolygon* polygon = object->PolygonItems[i];
-            if (!polygon) continue;
+    for (auto* polygon : allPolygons) {
+        if (!polygon) continue;
 
-            double height = polygon->GetHeight();
-            double thickness = polygon->GetThickness();
+        double height = polygon->GetHeight();
+        double thickness = polygon->GetThickness();
+        if (thickness <= 1e-6) continue;
 
-            std::vector<double> xCoords;
-            std::vector<double> yCoords;
+        std::vector<double> xCoords, yCoords;
+
+        // Use cleaned coordinates if available, otherwise use original
+        auto it = cleanedCoords.find(polygon);
+        if (it != cleanedCoords.end()) {
+            xCoords = it->second.first;
+            yCoords = it->second.second;
+        } else {
             for (size_t j = 0; j < polygon->GetPoints(); j++) {
                 xCoords.push_back(polygon->GetXCoords(j));
                 yCoords.push_back(polygon->GetYCoords(j));
             }
+        }
 
+        size_t numPoints = xCoords.size();
+        if (numPoints < 3) continue;
+
+        // Tessellate cleaned polygon using a temporary GDSPolygon (ear-clipping)
+        std::vector<size_t> triIndices;
+        if (it != cleanedCoords.end()) {
+            GDSPolygon tempPoly(height, thickness, polygon->GetLayer());
+            for (size_t j = 0; j < numPoints; j++) {
+                tempPoly.AddPoint(xCoords[j], yCoords[j]);
+            }
+            tempPoly.Tesselate();
+            std::vector<size_t>* tempIndices = tempPoly.GetIndices();
+            if (tempIndices) triIndices = *tempIndices;
+        } else {
             std::vector<size_t>* indices = polygon->GetIndices();
             if (!indices || indices->empty()) {
                 polygon->Tesselate();
                 indices = polygon->GetIndices();
             }
-
             if (indices) {
-                AddPolygonTriangles(height, thickness, xCoords, yCoords, *indices, tris);
+                triIndices = *indices;
             }
         }
-    };
 
-    // Collect from main object
-    collectTriangles(obj, triangles);
-
-    // Recursively collect from children if requested
-    if (includeChildren) {
-        for (size_t i = 0; i < obj->refs.size(); i++) {
-            GDSObject* ref = obj->refs[i]->object;
-            if (ref) {
-                collectTriangles((GDSObject_ogl*)ref, triangles);
-            }
+        if (!triIndices.empty()) {
+            AddPolygonTriangles(height, thickness, xCoords, yCoords, triIndices, triangles);
         }
     }
 
-    v_printf(1, "STL Export: collected %d triangles from object %s\n", (int)triangles.size(), obj->GetName());
+    v_printf(1, "STL Export: generated %d triangles from object %s\n", (int)triangles.size(), obj->GetName());
 
     return WriteBinarySTL(filename, triangles);
 }

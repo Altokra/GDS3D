@@ -304,6 +304,7 @@ public:
 	vector<size_t>* GetIndices();
 	double GetXCoords(size_t Index);
 	double GetYCoords(size_t Index);
+	void SetCoords(const vector<Point2D>& newCoords);
 	float GetAngleCoords(unsigned int Index);
 	void SetAngleCoords(unsigned int Index, float value);
     void Flip(); // Flip the winding order

@@ -11,6 +11,7 @@
 #include "gdsobject_ogl.h"
 #include "gds_globals.h"
 #include "gdspolygon.h"
+#include "polygon_cleaner.h"
 
 // --- OpenCASCADE core headers ---
 #include <gp_Pnt.hxx>
@@ -102,10 +103,16 @@ static void print_progress_end() {
 }
 
 bool STEPExport::Export(GDSObject_ogl* obj, const char* filename) {
-    return Export(obj, filename, true);
+    return Export(obj, filename, true, false, 0.0);
 }
 
 bool STEPExport::Export(GDSObject_ogl* obj, const char* filename, bool includeChildren) {
+    return Export(obj, filename, includeChildren, false, 0.0);
+}
+
+bool STEPExport::Export(GDSObject_ogl* obj, const char* filename,
+                       bool includeChildren, bool enableNarrowEdgeClean,
+                       double narrowEdgeDelta) {
     if (!obj) {
         v_printf(1, "[STEP Export] Error: NULL object passed to STEP export\n");
         return false;
@@ -166,6 +173,17 @@ bool STEPExport::Export(GDSObject_ogl* obj, const char* filename, bool includeCh
 
         size_t totalLayers = layerGroups.size();
         v_printf(1, "[STEP Export] Grouped into %zu Z-layers\n", totalLayers);
+
+        // ============================================================
+        // Step 2.5: Clean narrow edges per layer (optional)
+        // ============================================================
+        if (enableNarrowEdgeClean && narrowEdgeDelta > 0.0) {
+            v_printf(1, "[STEP Export] Cleaning narrow edges (delta=%.1f)...\n", narrowEdgeDelta);
+            for (auto& kv : layerGroups) {
+                PolygonCleaner::CleanPolygonsInPlace(kv.second, narrowEdgeDelta);
+            }
+            v_printf(1, "[STEP Export] Narrow edge cleaning complete.\n");
+        }
 
         // ============================================================
         // Step 3: Build OCCT shapes per layer (parallel)

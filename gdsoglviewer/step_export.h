@@ -22,6 +22,11 @@ public:
 
     // 导出 GDS 对象为 STEP 文件（可选是否包含子层级）
     static bool Export(GDSObject_ogl* obj, const char* filename, bool includeChildren);
+
+    // 导出 GDS 对象为 STEP 文件（可选窄边清理）
+    static bool Export(GDSObject_ogl* obj, const char* filename,
+                      bool includeChildren, bool enableNarrowEdgeClean,
+                      double narrowEdgeDelta = 5.0);
 };
 
 #endif // __STEP_EXPORT_H__

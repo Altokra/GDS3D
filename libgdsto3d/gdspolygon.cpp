@@ -879,6 +879,22 @@ size_t GDSPolygon::GetPoints()
 	return _Coords.size();
 }
 
+void GDSPolygon::SetCoords(const vector<Point2D>& newCoords)
+{
+	_Coords = newCoords;
+	indices.clear(); // Invalidate tessellation indices
+
+	// Rebuild 2D bounding box
+	bbox.clear();
+	for (size_t i = 0; i < newCoords.size(); i++)
+		bbox.addPoint(newCoords[i]);
+
+	// Rebuild 3D bounding box
+	bbox3D.clear();
+	bbox3D.addPoint(Point3D(bbox.min.X, bbox.min.Y, _Height));
+	bbox3D.addPoint(Point3D(bbox.max.X, bbox.max.Y, _Height + _Thickness));
+}
+
 vector<size_t>* GDSPolygon::GetIndices()
 {
 	// Tesselate if not done before

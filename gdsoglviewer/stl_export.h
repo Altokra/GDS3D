@@ -54,6 +54,15 @@ public:
      */
     static bool Export(GDSObject_ogl* obj, const char* filename, bool includeChildren);
 
+    /**
+     * @brief Export with optional narrow edge cleaning
+     * @param enableNarrowEdgeClean Enable per-layer polygon union + morphological clean
+     * @param narrowEdgeDelta Width threshold in db units; features < 2*delta removed
+     */
+    static bool Export(GDSObject_ogl* obj, const char* filename,
+                      bool includeChildren, bool enableNarrowEdgeClean,
+                      double narrowEdgeDelta = 5.0);
+
 private:
     // Triangle structure for STL
     struct Triangle {

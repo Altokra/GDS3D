@@ -149,6 +149,9 @@
     <ClInclude Include="..\gdsoglviewer\step_export.h">
       <Filter>Header Files\gdsoglviewer</Filter>
     </ClInclude>
+    <ClInclude Include="..\gdsoglviewer\polygon_cleaner.h">
+      <Filter>Header Files\gdsoglviewer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\gdsoglviewer\gdsobject_ogl.cpp">
@@ -251,6 +254,9 @@
       <Filter>Source Files\gdsoglviewer</Filter>
     </ClCompile>
     <ClCompile Include="..\gdsoglviewer\step_export.cpp">
+      <Filter>Source Files\gdsoglviewer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\gdsoglviewer\polygon_cleaner.cpp">
       <Filter>Source Files\gdsoglviewer</Filter>
     </ClCompile>
   </ItemGroup>
