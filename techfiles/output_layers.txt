@@ -1,0 +1,143 @@
+LayerStart: M1
+Layer: 11
+Height: 0
+Thickness: 200
+Red: 1.0
+Green: 0.9
+Blue: 0.75
+Filter: 0.0
+Metal: 0
+Show: 1
+LayerEnd
+
+LayerStart: VIA1-2
+Layer: 12
+Height: 200
+Thickness: 350
+Red: 0.0
+Green: 0.0
+Blue: 1.0
+Filter: 0.0
+Metal: 0
+Show: 1
+LayerEnd
+
+LayerStart: M2
+Layer: 13
+Height: 550
+Thickness: 200
+Red: 1.0
+Green: 0.9
+Blue: 0.75
+Filter: 0.0
+Metal: 0
+Show: 1
+LayerEnd
+
+LayerStart: VIA2-3
+Layer: 14
+Height: 750
+Thickness: 350
+Red: 0.0
+Green: 0.0
+Blue: 1.0
+Filter: 0.0
+Metal: 0
+Show: 1
+LayerEnd
+
+LayerStart: M3
+Layer: 15
+Height: 1100
+Thickness: 200
+Red: 1.0
+Green: 0.9
+Blue: 0.75
+Filter: 0.0
+Metal: 0
+Show: 1
+LayerEnd
+
+LayerStart: VIA3-4
+Layer: 16
+Height: 1300
+Thickness: 350
+Red: 0.0
+Green: 0.0
+Blue: 1.0
+Filter: 0.0
+Metal: 0
+Show: 1
+LayerEnd
+
+LayerStart: M4
+Layer: 17
+Height: 1650
+Thickness: 200
+Red: 1.0
+Green: 0.9
+Blue: 0.75
+Filter: 0.0
+Metal: 0
+Show: 1
+LayerEnd
+
+LayerStart: VIA4-5
+Layer: 18
+Height: 1850
+Thickness: 350
+Red: 0.0
+Green: 0.0
+Blue: 1.0
+Filter: 0.0
+Metal: 0
+Show: 1
+LayerEnd
+
+LayerStart: M5
+Layer: 19
+Height: 2200
+Thickness: 200
+Red: 1.0
+Green: 0.9
+Blue: 0.75
+Filter: 0.0
+Metal: 0
+Show: 1
+LayerEnd
+
+LayerStart: VIA5-6
+Layer: 20
+Height: 2400
+Thickness: 350
+Red: 0.0
+Green: 0.0
+Blue: 1.0
+Filter: 0.0
+Metal: 0
+Show: 1
+LayerEnd
+
+LayerStart: M6
+Layer: 21
+Height: 2750
+Thickness: 200
+Red: 1.0
+Green: 0.9
+Blue: 0.75
+Filter: 0.0
+Metal: 0
+Show: 1
+LayerEnd
+
+LayerStart: M6
+Layer: 235
+Height: -500
+Thickness: 500
+Red: 1.0
+Green: 0.9
+Blue: 0.75
+Filter: 0.0
+Metal: 0
+Show: 1
+LayerEnd

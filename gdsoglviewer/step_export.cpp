@@ -27,6 +27,7 @@
 #include <vector>
 #include <utility>
 #include <atomic>
+#include <cmath>
 
 // Progress bar width (number of '#' characters)
 #define PROGRESS_BAR_WIDTH 30
@@ -41,7 +42,10 @@ struct ZLayerKey {
     double thickness;
 
     bool operator<(const ZLayerKey& o) const {
-        if (height != o.height) return height < o.height;
+        // Use tolerance comparison to avoid floating-point precision issues
+        // e.g. 0.139999999 vs 0.14 should be treated as the same layer
+        const double EPS = 1e-9;
+        if (std::abs(height - o.height) > EPS) return height < o.height;
         return thickness < o.thickness;
     }
 };

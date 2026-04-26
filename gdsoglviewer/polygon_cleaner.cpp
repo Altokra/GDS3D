@@ -74,97 +74,87 @@ static Paths UnionAndClean(const Paths& input, cInt delta_int)
 }
 
 // --- Remove sliver vertices from a single path ---
-// Algorithm:
-//   1. Scan the polygon for "step" patterns: 3 consecutive vertices A-B-C where
-//      one of the edges (A→B or B→C) is a short sliver (< threshold).
-//   2. For axis-aligned polygons from Clipper, a step is an L-shaped corner.
-//   3. Use the 2D cross product at B to determine the corner type:
-//        cross(A,B,C) > 0  → convex (spike)   → remove B directly
-//        cross(A,B,C) < 0  → concave (notch)   → extend/fill: keep A, skip B, insert new corner
-//   4. Result path stays axis-aligned (no diagonal edges).
+// Manhattan Intersection Projection method:
+//   1. Scan 3 consecutive vertices A-B-C where B has a short adjacent edge.
+//   2. Cross product determines convex (spike) vs concave (notch):
+//      - Spike (cross > 0): directly skip B (chop off the protrusion)
+//      - Notch (cross < 0): skip B, insert Manhattan intersection point B'
+//        B' = (C.X, A.Y) or (A.X, C.Y), chosen by dominant axis
+//   3. Result path stays strictly axis-aligned (no diagonal edges).
 static Path RemoveSliverVertices(const Path& path, cInt threshold)
 {
     if (path.size() < 4) return path;
 
     const size_t n = path.size();
-    Path result;
-    result.reserve(n * 2); // worst case: each step becomes 3 vertices
 
-    for (size_t i = 0; i < n; ++i) {
+    // Phase 1: identify all sliver vertices
+    vector<bool> isSliver(n, false);
+    for (size_t i = 0; i < n; i++) {
         size_t prev = (i + n - 1) % n;
         size_t next = (i + 1) % n;
+        cInt len_prev = std::max(std::abs(path[i].X - path[prev].X),
+                                 std::abs(path[i].Y - path[prev].Y));
+        cInt len_next = std::max(std::abs(path[next].X - path[i].X),
+                                 std::abs(path[next].Y - path[i].Y));
+        if (len_prev < threshold || len_next < threshold) {
+            isSliver[i] = true;
+        }
+    }
 
-        const IntPoint& A = path[prev]; // previous vertex
-        const IntPoint& B = path[i];    // current vertex (potential sliver)
-        const IntPoint& C = path[next];  // next vertex
+    // Phase 2: build result path with Manhattan projection for notches
+    Path result;
+    result.reserve(n * 2);
+    int spikeCount = 0, notchCount = 0;
 
-        // Length of adjacent edges (L-infinity for axis-aligned)
-        cInt len_prev = std::max(std::abs(B.X - A.X), std::abs(B.Y - A.Y));
-        cInt len_next = std::max(std::abs(C.X - B.X), std::abs(C.Y - B.Y));
-
-        bool isShort = (len_prev < threshold) || (len_next < threshold);
-
-        if (!isShort) {
-            // Normal vertex, keep it
-            result.push_back(B);
+    for (size_t i = 0; i < n; i++) {
+        if (!isSliver[i]) {
+            result.push_back(path[i]);
             continue;
         }
 
-        // --- Sliver corner detected at B ---
-        // Compute 2D cross product of (A→B) × (B→C)
-        // For CCW polygons: cross > 0 means convex, cross < 0 means concave
+        // Find the nearest non-sliver predecessor A in the original path
+        size_t aIdx = (i + n - 1) % n;
+        while (aIdx != i && isSliver[aIdx]) {
+            aIdx = (aIdx + n - 1) % n;
+        }
+        // Find the nearest non-sliver successor C in the original path
+        size_t cIdx = (i + 1) % n;
+        while (cIdx != i && isSliver[cIdx]) {
+            cIdx = (cIdx + 1) % n;
+        }
+
+        const IntPoint& A = path[aIdx];
+        const IntPoint& B = path[i];
+        const IntPoint& C = path[cIdx];
+
+        // Cross product at B
         cInt cross = (B.X - A.X) * (C.Y - B.Y) - (B.Y - A.Y) * (C.X - B.X);
 
         if (cross > 0) {
-            // === CONVEX SPIKE: B is a protruding corner ===
-            // Example:    A---B
-            //             |   |
-            //             |   C
-            // Just skip B; the edge A→C replaces the spike.
-            // Don't add B, continue. (A is already in result from last iteration,
-            // or will be added. But A might have been skipped too if it was also sliver.
-            // Safe approach: add B only if it's not consecutive sliver.)
-            // Actually, since we skip B, A→C connects directly. This is always safe.
-            // Skip B. But don't duplicate A either.
-            // We already added A in the previous iteration (if it wasn't short).
-            // So just skip B.
-            // (No action needed, B is not added.)
+            // CONVEX SPIKE: skip B, A→C connection replaces the spike
+            spikeCount++;
+            continue;
+        } else if (cross < 0) {
+            // CONCAVE NOTCH: skip B, insert Manhattan intersection point B'
+            notchCount++;
+            cInt len_prev = std::max(std::abs(B.X - A.X), std::abs(B.Y - A.Y));
+            cInt len_next = std::max(std::abs(C.X - B.X), std::abs(C.Y - B.Y));
+
+            IntPoint Bprime;
+            if (len_next >= len_prev) {
+                Bprime.X = C.X; Bprime.Y = A.Y;
+            } else {
+                Bprime.X = A.X; Bprime.Y = C.Y;
+            }
+
+            // Insert B' if not duplicate
+            if (result.empty() ||
+                (result.back().X != Bprime.X || result.back().Y != Bprime.Y)) {
+                result.push_back(Bprime);
+            }
             continue;
         } else {
-            // === CONCAVE NOTCH: B is a re-entrant corner ===
-            // Example:    A   C
-            //             | / |
-            //             B   |
-            //                |
-            // Skip B, extend A in the direction of C (fill the notch).
-            // Insert a new vertex at the intersection of A's axis and C's axis.
-            // The L-shaped step: we want A→NEW→C where NEW keeps both axis directions.
-            //
-            // Extension strategy: project C's position onto the axis that extends from A.
-            // Since axis-aligned, one of the two edges is horizontal, one is vertical.
-            // We extend A in the direction of C, then drop down/up to C.
-            // The notch "fill" always extends in the direction of the longer leg.
-            //
-            // Choose fill direction based on which edge is longer (more significant)
-            if (len_next >= len_prev) {
-                // Extend B's outgoing direction: B→C is the dominant axis
-                // Skip B, insert new corner at (C.X, A.Y)
-                cInt newX = C.X;
-                cInt newY = A.Y;
-                // Only add if it's different from last vertex in result
-                if (result.empty() || (result.back().X != newX || result.back().Y != newY)) {
-                    result.push_back(IntPoint(newX, newY));
-                }
-            } else {
-                // Extend A's incoming direction: A→B is the dominant axis
-                // Skip B, insert new corner at (A.X, C.Y)
-                cInt newX = A.X;
-                cInt newY = C.Y;
-                if (result.empty() || (result.back().X != newX || result.back().Y != newY)) {
-                    result.push_back(IntPoint(newX, newY));
-                }
-            }
-            // Skip B (don't add it)
+            // cross == 0: collinear, just skip B
             continue;
         }
     }
@@ -173,7 +163,7 @@ static Path RemoveSliverVertices(const Path& path, cInt threshold)
     if (result.size() >= 2) {
         Path deduped;
         deduped.push_back(result[0]);
-        for (size_t i = 1; i < result.size(); ++i) {
+        for (size_t i = 1; i < result.size(); i++) {
             if (result[i].X != deduped.back().X || result[i].Y != deduped.back().Y) {
                 deduped.push_back(result[i]);
             }
@@ -181,14 +171,14 @@ static Path RemoveSliverVertices(const Path& path, cInt threshold)
         result.swap(deduped);
     }
 
-    // Also check: last vertex might equal first (closed polygon)
+    // Remove trailing vertex if it equals first (closed polygon)
     while (result.size() >= 2 &&
            result.back().X == result[0].X && result.back().Y == result[0].Y) {
         result.pop_back();
     }
 
-    v_printf(1, "[SliverRemoval] %zu vertices -> %zu (threshold=%lld)\n",
-             n, result.size(), threshold);
+    v_printf(1, "[SliverRemoval] %zu -> %zu verts (spikes=%d, notches=%d, thr=%lld)\n",
+             n, result.size(), spikeCount, notchCount, threshold);
 
     if (result.size() < 3) return path; // Safety: don't degenerate
     return result;
