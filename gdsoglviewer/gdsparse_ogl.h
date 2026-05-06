@@ -83,6 +83,7 @@ public:
 	int mouse_prev_y;
 	bool _temp_mouse;
 	GDSObject_ogl*      _topcell;
+	class Output* _geoOutput;  // For merged polygons from SimplifyPolyItems_wClipper
 
 	GDSParse_ogl (class GDSProcess *process, bool generate_process);
 	~GDSParse_ogl ();

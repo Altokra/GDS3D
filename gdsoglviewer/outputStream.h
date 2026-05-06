@@ -138,6 +138,8 @@ public:
 	void Polygon(GeoPolygon * polygon, ProcessLayer * do_layer, bool dielectrique);
 	void Polygon(GeoPolygon * polygon, ProcessLayer * do_layer, bool dielectrique, double MeshElemSize);
 	void ConnectPoly(GeoPolygon * polygon, bool Top);
+	// Get the merged polygon groups (after SimplifyPolyItems_wClipper)
+	std::vector<GDSGroup*>& GetFullGDSItems() { return FullGDSItems; }
 	vector<GeoPolygon*> SimplifyPolyItems_wClipper(vector<GDSPolygon*> PolygonItems, ProcessLayer * Layer);
 	vector<GeoPolygon*> SimplifyPolyItems_wClipper(vector<GeoPolygon*> PolygonItems, ProcessLayer * Layer);
 	vector<GeoPolygon*> Convert_ClipperPolyTree(ClipperLib::PolyTree * pTree, ProcessLayer * Layer);

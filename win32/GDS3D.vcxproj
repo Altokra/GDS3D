@@ -305,7 +305,7 @@
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;TKernel.lib;TKMath.lib;TKG2d.lib;TKG3d.lib;TKBRep.lib;TKTopAlgo.lib;TKPrim.lib;TKDE.lib;TKDESTEP.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;TKernel.lib;TKMath.lib;TKG2d.lib;TKG3d.lib;TKBRep.lib;TKTopAlgo.lib;TKBO.lib;TKBool.lib;TKShHealing.lib;TKPrim.lib;TKDE.lib;TKDESTEP.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <Version>1.9</Version>
       <AdditionalLibraryDirectories>D:\Program Files\opencascade\opencascade-7.9.3-vc14-64\win64\vc14\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>

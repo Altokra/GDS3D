@@ -14,6 +14,7 @@
 #define __STEP_EXPORT_H__
 
 class GDSObject_ogl;
+class Output;
 
 class STEPExport {
 public:
@@ -27,6 +28,10 @@ public:
     static bool Export(GDSObject_ogl* obj, const char* filename,
                       bool includeChildren, bool enableNarrowEdgeClean,
                       double narrowEdgeDelta = 5.0);
+
+    // 使用已合并的多边形（从 Output::GetFullGDSItems 获取）导出 STEP
+    static bool Export(Output* output, const char* filename,
+                      bool enableNarrowEdgeClean = false, double narrowEdgeDelta = 5.0);
 };
 
 #endif // __STEP_EXPORT_H__

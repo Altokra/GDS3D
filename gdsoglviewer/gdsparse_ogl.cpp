@@ -64,6 +64,7 @@ GDSParse_ogl::GDSParse_ogl(class GDSProcess *process, bool generate_process) : G
 	sub_layer = NULL;
 	substrate = NULL;
 	firstrun = true;
+	_geoOutput = NULL;
     
 	_x = _rx = _vrx = 0.0f;
 	_y = _ry = _vry = 0.0f;
@@ -271,7 +272,7 @@ int GDSParse_ogl::SetTopcell(const char *topcell)
 void GDSParse_ogl::initWorld()
 {
     v_printf(1, "Building hierarchy.. ");
-    
+
     // Absorb small objects into larger objects
     _topcell->countTotalPoints();
     _topcell->collapseHierachy();
@@ -1098,8 +1099,13 @@ void GDSParse_ogl::gl_event( int event, int data, int xpos, int ypos , bool shif
 		case KEY_F:
 			if (!ui_highlight->GetState())
 			{
-				Output TopView2Geo;
-				TopView2Geo.SaveToGEO(_topcell, true);
+				// Delete previous geoOutput if exists
+				if (_geoOutput) {
+					delete _geoOutput;
+					_geoOutput = NULL;
+				}
+				_geoOutput = new Output();
+				_geoOutput->SaveToGEO(_topcell, true);
 				v_printf(0, "Geo File Done\n");
 			}
 			break;
@@ -1120,10 +1126,8 @@ void GDSParse_ogl::gl_event( int event, int data, int xpos, int ypos , bool shif
 		case KEY_G:
             if (!ui_highlight->GetState())
             {
-                // _topcell 是 GDS3D 中代表当前加载的芯片顶层单元的全局/成员变量
                 if (_topcell) {
-                    v_printf(1, "\n--- Starting STEP Export ---\n");
-                    // 传入真实的芯片对象！启用窄边清理 (delta=0.01 → delta_int=10, 消除<10nm的窄边)
+                    v_printf(1, "\n--- Starting STEP Export (direct parsed geometry) ---\n");
                     STEPExport::Export((GDSObject_ogl*)_topcell, "output_real_chip.step", true, true, 0.01);
                     v_printf(1, "STEP File Done\n");
                 } else {
